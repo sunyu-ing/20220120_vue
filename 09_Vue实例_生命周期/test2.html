@@ -26,6 +26,8 @@
 <div id="demo">
   <button @click="destoryVm">destory vue</button>
   <p v-show="isShow">xxxxx</p>
+
+  <p ref="content">{{isShow ? 'true' : 'false'}}</p>
 </div>
 
 <script type="text/javascript" src="../js/vue.js"></script>
@@ -35,11 +37,24 @@
       isShow: true,
     },
 
+    beforeCreate() { //不能通过vm读取data中的数据
+      console.log('beforeCreate()', this.isShow)
+    },
+    //两者之间实现数据代理/data数据的监视(setter)
+    created() { //可以通过vm读取data中的数据
+      console.log('created()', this.isShow)
+    },
+
+    beforeMount() { //不能通过ref读取标签对象
+      console.log('beforeMount()', this.$refs.content)
+    },
+    //两者之间初始第一次显示/渲染页面
     /*
     界面初始显示之后立即回调
     一般在此执行异步操作：发ajax请求/启动定时器/订阅消息/绑定自定义事件监听
     */
-    mounted() {
+    mounted() {  //可以通过ref读取标签对象
+      console.log('mounted()', this.$refs.content)
       // setInterval(function () {   //不能实现，mounted回调函数的this是vm，但是setInterval的this是Window
       //   this.isShow = !this.isShow
       // }, 1000)
@@ -63,12 +78,26 @@
 
     },
 
+    //都是在数据更新之后执行，所谓的更新是指页面的更新
+    beforeUpdate() { //看到的界面是老的界面
+      console.log('beforeUpdate()', this.isShow, this.$refs.content.innerHTML)
+    },
+    //更新页面
+    updated() { //看到的界面是新的界面
+      console.log('updated()', this.isShow, this.$refs.content.innerHTML)
+    },
+
+
     /*
     在vm死亡之前调用
     在此做一些收尾的工作
     */
     beforeDestroy() {
+      console.log('beforeDestroy()')
       clearInterval(this.intervalId)
+    },
+    destoryed () {
+      console.log('destroyed()')
     },
 
     methods: {
